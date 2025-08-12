@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { OrbitControls } from "./utils/OrbitControls";
 import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { FontLoader } from "three/examples/jsm/loaders/FontLoader.js";
@@ -17,22 +17,52 @@ const modals = {
   about: document.querySelector(".modal.about"),
   contact: document.querySelector(".modal.contact"),
 };
+let touchHappened = false;
 
 document.querySelectorAll(".modal-exit-button").forEach((button) => {
-  button.addEventListener("click", (e) => {
-    const modal = e.target.closest(".modal");
-    hideModal(modal);
-  });
+  button.addEventListener(
+    "touchend",
+    (e) => {
+      touchHappened = true;
+      e.preventDefault();
+      const modal = e.target.closest(".modal");
+      hideModal(modal);
+    },
+    { passive: false }
+  );
+
+  button.addEventListener(
+    "click",
+    (e) => {
+      if (touchHappened) return;
+      e.preventDefault();
+      const modal = e.target.closest(".modal");
+      hideModal(modal);
+    },
+    { passive: false }
+  );
 });
+let isModalOpen = false;
 
 const showModal = (modal) => {
   modal.style.display = "block";
+  isModalOpen = true;
+  controls.enabled = false;
+
+  if (currentHoverObject) {
+    playHoverAnimation(currentHoverObject, false, true);
+    currentHoverObject = null;
+  }
+  document.body.style.cursor = "default";
+  currentIntersects = [];
 
   gsap.set(modal, { opacity: 0 });
   gsap.to(modal, { opacity: 1, duration: 0.5 });
 };
 
 const hideModal = (modal) => {
+  isModalOpen = false;
+  controls.enabled = true;
   gsap.to(modal, {
     opacity: 0,
     duration: 0.5,
@@ -46,6 +76,7 @@ const raycaster = new THREE.Raycaster();
 const pointer = new THREE.Vector2();
 const raycasterObjects = [];
 let currentIntersects = [];
+let currentHoverObject = null;
 
 const socialLinks = {};
 // loaders
@@ -108,7 +139,43 @@ const fans = [];
 window.addEventListener("mousemove", (e) => {
   pointer.x = (e.clientX / window.innerWidth) * 2 - 1;
   pointer.y = -(e.clientY / window.innerHeight) * 2 + 1;
+  touchHappened = false;
 });
+
+window.addEventListener(
+  "touchstart",
+  (e) => {
+    if (isModalOpen) return;
+    e.preventDefault();
+    pointer.x = (e.touches[0].clientX / window.innerWidth) * 2 - 1;
+    pointer.y = -(e.touches[0].clientY / window.innerHeight) * 2 + 1;
+  },
+  { passive: false }
+);
+
+window.addEventListener(
+  "touchend",
+  (e) => {
+    if (isModalOpen) return;
+    e.preventDefault();
+    handleRaycastInteraction();
+  },
+  { passive: false }
+);
+
+function handleRaycastInteraction() {
+  if (currentIntersects.length > 0) {
+    const object = currentIntersects[0].object;
+
+    if (object.name.includes("MyWork")) {
+      showModal(modals.work);
+    } else if (object.name.includes("Contact")) {
+      showModal(modals.contact);
+    } else if (object.name.includes("About")) {
+      showModal(modals.about);
+    }
+  }
+}
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(
@@ -124,6 +191,13 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
 const controls = new OrbitControls(camera, renderer.domElement);
+controls.minDistance = 5;
+controls.maxDistance = 35;
+controls.minPolarAngle = 0;
+controls.maxPolarAngle = Math.PI / 2;
+controls.minAzimuthAngle = 0;
+controls.maxAzimuthAngle = Math.PI / 2;
+
 controls.enableDamping = true;
 controls.dampingFactor = 0.05;
 controls.update();
@@ -159,7 +233,15 @@ loader.load("/models/PortfolioModelV2.glb", (glb) => {
             }
             if (child.name.includes("Raycastable")) {
               raycasterObjects.push(child);
-              console.log(child.name);
+              child.userData.initialScale = new THREE.Vector3().copy(
+                child.scale
+              );
+              child.userData.initialRotation = new THREE.Euler().copy(
+                child.rotation
+              );
+              child.userData.initialPosition = new THREE.Vector3().copy(
+                child.position
+              );
             }
             if (child.material.map) {
               child.material.map.minFilter = THREE.LinearFilter;
@@ -231,19 +313,45 @@ window.addEventListener("resize", () => {
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 });
 
-window.addEventListener("click", () => {
-  if (currentIntersects.length > 0) {
-    const object = currentIntersects[0].object;
+window.addEventListener("click", handleRaycastInteraction);
 
-    if (object.name.includes("MyWork")) {
-      showModal(modals.work);
-    } else if (object.name.includes("Contact")) {
-      showModal(modals.contact);
-    } else if (object.name.includes("About")) {
-      showModal(modals.about);
+function playHoverAnimation(object, isHovering, withRotation = false) {
+  gsap.killTweensOf(object.scale);
+  gsap.killTweensOf(object.rotation);
+  gsap.killTweensOf(object.position);
+
+  if (isHovering) {
+    gsap.to(object.scale, {
+      x: object.userData.initialScale.x * 1.2,
+      z: object.userData.initialScale.z * 1.2,
+      y: object.userData.initialScale.y * 1.2,
+      duration: 0.5,
+      ease: "bounce.out(1.8)",
+    });
+    if (withRotation) {
+      gsap.to(object.rotation, {
+        x: object.userData.initialRotation.x + Math.PI / 8,
+        duration: 0.5,
+        ease: "bounce.out(1.8)",
+      });
+    }
+  } else {
+    gsap.to(object.scale, {
+      x: object.userData.initialScale.x,
+      z: object.userData.initialScale.z,
+      y: object.userData.initialScale.y,
+      duration: 0.3,
+      ease: "bounce.out(1.8)",
+    });
+    if (withRotation) {
+      gsap.to(object.rotation, {
+        x: object.userData.initialRotation.x,
+        duration: 0.3,
+        ease: "bounce.out(1.8)",
+      });
     }
   }
-});
+}
 
 const render = () => {
   controls.update();
@@ -258,23 +366,64 @@ const render = () => {
   });
 
   // Raycaster
-  raycaster.setFromCamera(pointer, camera);
+  if (!isModalOpen) {
+    raycaster.setFromCamera(pointer, camera);
 
-  currentIntersects = raycaster.intersectObjects(raycasterObjects);
+    currentIntersects = raycaster.intersectObjects(raycasterObjects);
 
-  for (let i = 0; i < currentIntersects.length; i++) {}
+    for (let i = 0; i < currentIntersects.length; i++) {}
 
-  if (currentIntersects.length > 0) {
-    const currentIntersectObject = currentIntersects[0].object;
-    if (currentIntersectObject.name.includes("Pointer")) {
-      document.body.style.cursor = "pointer";
+    if (currentIntersects.length > 0) {
+      const currentIntersectObject = currentIntersects[0].object;
+      if (
+        currentIntersectObject.name.includes("Raycastable") &&
+        !currentIntersectObject.name.includes("Text")
+      ) {
+        if (currentIntersectObject !== currentHoverObject) {
+          if (currentHoverObject) {
+            if (
+              currentHoverObject.name.includes("Work") ||
+              currentHoverObject.name.includes("Contact") ||
+              currentHoverObject.name.includes("About")
+            ) {
+              playHoverAnimation(currentHoverObject, false, true);
+            } else {
+              playHoverAnimation(currentHoverObject, false, false);
+            }
+          }
+          if (
+            currentIntersectObject.name.includes("Work") ||
+            currentIntersectObject.name.includes("About") ||
+            currentIntersectObject.name.includes("Contact")
+          ) {
+            playHoverAnimation(currentIntersectObject, true, true);
+          } else {
+            playHoverAnimation(currentIntersectObject, true, false);
+          }
+          currentHoverObject = currentIntersectObject;
+        }
+      }
+      if (currentIntersectObject.name.includes("Pointer")) {
+        document.body.style.cursor = "pointer";
+      } else {
+        document.body.style.cursor = "default";
+      }
     } else {
+      if (currentHoverObject) {
+        if (
+          currentHoverObject.name.includes("Work") ||
+          currentHoverObject.name.includes("Contact") ||
+          currentHoverObject.name.includes("About")
+        ) {
+          playHoverAnimation(currentHoverObject, false, true);
+        } else {
+          playHoverAnimation(currentHoverObject, false, false);
+        }
+        currentHoverObject = null;
+      }
       document.body.style.cursor = "default";
     }
-  } else {
-    document.body.style.cursor = "default";
   }
-
   // Animate floating Z letters
   const elapsed = performance.now() / 1000;
   const cycleDuration = 5;
