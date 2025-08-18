@@ -52,6 +52,13 @@ document.querySelectorAll(".modal-exit-button").forEach((button) => {
   );
 });
 let isModalOpen = false;
+const sound = new Audio("/music/Pop.mp3");
+
+const playPopSound = () => {
+  sound.currentTime = 0;
+  sound.play();
+};
+
 const showModal = (modal) => {
   modal.style.display = "flex";
   bgOverlay.style.display = "block";
@@ -66,6 +73,7 @@ const showModal = (modal) => {
   currentIntersects = [];
 
   // Start scale small and transparent
+  playPopSound();
   gsap.set(modal, { scale: 0, opacity: 0, transformOrigin: "center" });
 
   // Animate pop-in with overshoot
@@ -95,7 +103,7 @@ const showModal = (modal) => {
 const hideModal = (modal) => {
   isModalOpen = false;
   controls.enabled = true;
-
+  playPopSound();
   gsap.to(modal, {
     opacity: 0,
     scale: 0,
@@ -602,6 +610,39 @@ const render = () => {
   renderer.render(scene, camera);
   window.requestAnimationFrame(render);
 };
+
+const bgMusic = new Audio("/music/music.mp3");
+bgMusic.loop = true;
+bgMusic.volume = 0.5;
+
+const musicToggleBtn = document.getElementById("music-toggle");
+const musicIcon = document.getElementById("music-icon");
+const musicMuted = "/icons/Mute.svg";
+const musicOn = "/icons/Unmute.svg";
+let isMusicPlaying = false;
+
+musicToggleBtn.addEventListener("click", () => {
+  if (isMusicPlaying) {
+    bgMusic.pause();
+    musicIcon.src = musicMuted;
+  } else {
+    bgMusic.play();
+    musicIcon.src = musicOn;
+  }
+  isMusicPlaying = !isMusicPlaying;
+});
+
+musicToggleBtn.addEventListener("touchend", () => {
+  if (isMusicPlaying) {
+    bgMusic.pause();
+    musicIcon.src = musicMuted;
+  } else {
+    bgMusic.play();
+    musicIcon.src = musicOn;
+  }
+  isMusicPlaying = !isMusicPlaying;
+});
+
 const enterBtn = document.getElementById("enter-button");
 enterBtn.addEventListener("click", () => {
   const loadingScreen = document.getElementById("loading-screen");
@@ -620,6 +661,12 @@ enterBtn.addEventListener("click", () => {
       playIntroAnimation();
     },
   });
+
+  bgMusic.play().catch((err) => {
+    console.warn("Autoplay prevented. User interaction needed.", err);
+  });
+  isMusicPlaying = true;
+  musicIcon.src = musicOn;
 });
 
 enterBtn.addEventListener("touchend", () => {
@@ -639,6 +686,12 @@ enterBtn.addEventListener("touchend", () => {
       playIntroAnimation();
     },
   });
+
+  bgMusic.play().catch((err) => {
+    console.warn("Autoplay prevented. User interaction needed.", err);
+  });
+  isMusicPlaying = true;
+  musicToggleBtn.textContent = "🔊";
 });
 
 render();
