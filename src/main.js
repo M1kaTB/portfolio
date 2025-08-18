@@ -622,4 +622,23 @@ enterBtn.addEventListener("click", () => {
   });
 });
 
+enterBtn.addEventListener("touchend", () => {
+  const loadingScreen = document.getElementById("loading-screen");
+  const text = document.querySelector(".loading-text");
+
+  text.textContent = "Welcome";
+
+  gsap.to(loadingScreen, {
+    duration: 1.2,
+    rotationX: 90,
+    y: "-120%",
+    ease: "power4.in",
+    transformOrigin: "center",
+    onComplete: () => {
+      loadingScreen.style.display = "none";
+      playIntroAnimation();
+    },
+  });
+});
+
 render();
