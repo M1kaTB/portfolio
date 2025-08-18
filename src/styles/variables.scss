@@ -1,0 +1,18 @@
+$color-primary: #d2b06c; // warm gold
+$color-secondary: #954612; // rich reddish-brown
+$color-accent: #b38b3d; // muted gold-brown
+$color-dark: #7f5531; // deep earthy brown
+
+// Suggested panel colors (backgrounds, borders, highlights)
+$panel-bg-light: #f5e9d1; // soft cream for contrast
+$panel-bg-mid: #c7a86b; // lighter gold tone
+$panel-bg-dark: #5b3b20; // deep warm brown
+$panel-border: #9a7747; // warm border color
+$panel-hover: #e0c38a; // subtle hover gold
+
+// Mixins
+@mixin centered {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

@@ -11,12 +11,21 @@ const sizes = {
   height: window.innerHeight,
   width: window.innerWidth,
 };
+// Loading Manager
+const loadingManager = new THREE.LoadingManager(() => {
+  // When everything is loaded
+  document.querySelector(".loading-text").textContent = "Loaded!";
+  const enterBtn = document.getElementById("enter-button");
+  enterBtn.style.display = "block";
+});
 
 const modals = {
   work: document.querySelector(".modal.work"),
   about: document.querySelector(".modal.about"),
   contact: document.querySelector(".modal.contact"),
 };
+const bgOverlay = document.querySelector(".bgOverlay");
+
 let touchHappened = false;
 
 document.querySelectorAll(".modal-exit-button").forEach((button) => {
@@ -43,9 +52,9 @@ document.querySelectorAll(".modal-exit-button").forEach((button) => {
   );
 });
 let isModalOpen = false;
-
 const showModal = (modal) => {
-  modal.style.display = "block";
+  modal.style.display = "flex";
+  bgOverlay.style.display = "block";
   isModalOpen = true;
   controls.enabled = false;
 
@@ -56,18 +65,54 @@ const showModal = (modal) => {
   document.body.style.cursor = "default";
   currentIntersects = [];
 
-  gsap.set(modal, { opacity: 0 });
-  gsap.to(modal, { opacity: 1, duration: 0.5 });
-};
+  // Start scale small and transparent
+  gsap.set(modal, { scale: 0, opacity: 0, transformOrigin: "center" });
 
+  // Animate pop-in with overshoot
+  gsap.set(modal, {
+    opacity: 0,
+    scale: 0,
+  });
+
+  gsap.to(modal, {
+    opacity: 1,
+    scale: 1,
+    duration: 0.5,
+    ease: "back.out(2)",
+  });
+  // Overlay animation
+  gsap.set(bgOverlay, {
+    backdropFilter: "blur(0px)",
+    backgroundColor: "rgba(0,0,0,0)",
+  });
+  gsap.to(bgOverlay, {
+    backdropFilter: "blur(5px)",
+    backgroundColor: "rgba(0,0,0,0.4)",
+    duration: 0.5,
+    ease: "power2.out",
+  });
+};
 const hideModal = (modal) => {
   isModalOpen = false;
   controls.enabled = true;
+
   gsap.to(modal, {
     opacity: 0,
+    scale: 0,
     duration: 0.5,
+    ease: "back.in(2)",
     onComplete: () => {
       modal.style.display = "none";
+    },
+  });
+  // Overlay fade out
+  gsap.to(bgOverlay, {
+    backdropFilter: "blur(0px)",
+    backgroundColor: "rgba(0,0,0,0)",
+    duration: 0.5,
+    ease: "power2.in",
+    onComplete: () => {
+      bgOverlay.style.display = "none";
     },
   });
 };
@@ -80,13 +125,13 @@ let currentHoverObject = null;
 
 const socialLinks = {};
 // loaders
-const textureLoader = new THREE.TextureLoader();
+const textureLoader = new THREE.TextureLoader(loadingManager);
 
 // model loader
-const dracoLoader = new DRACOLoader();
+const dracoLoader = new DRACOLoader(loadingManager);
 dracoLoader.setDecoderPath("/draco/");
 
-const loader = new GLTFLoader();
+const loader = new GLTFLoader(loadingManager);
 loader.setDRACOLoader(dracoLoader);
 
 const textureMap = {
@@ -120,7 +165,10 @@ videoElement.muted = true;
 videoElement.playsInline = true;
 videoElement.autoplay = true;
 videoElement.play();
-
+videoElement.oncanplaythrough = () => {
+  loadingManager.itemEnd("video");
+};
+loadingManager.itemStart("video");
 // Video Texture Options
 const videoTexture = new THREE.VideoTexture(videoElement);
 videoTexture.colorSpace = THREE.SRGBColorSpace;
@@ -178,29 +226,59 @@ function handleRaycastInteraction() {
 }
 
 const scene = new THREE.Scene();
+scene.background = new THREE.Color("#D9CAD1");
 const camera = new THREE.PerspectiveCamera(
   35,
   sizes.width / sizes.height,
   0.1,
-  1000
+  200
 );
-camera.position.set(8.537801878898776, 2.3438515795786268, 5.577204976955839);
 
 const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
 const controls = new OrbitControls(camera, renderer.domElement);
-controls.minDistance = 5;
-controls.maxDistance = 35;
-controls.minPolarAngle = 0;
-controls.maxPolarAngle = Math.PI / 2;
+// OrbitControls setup
+controls.enableDamping = true;
+controls.dampingFactor = 0.08;
+
+controls.rotateSpeed = 0.4;
+controls.zoomSpeed = 0.6;
+controls.panSpeed = 0.5;
+
+controls.minDistance = 2.5;
+controls.maxDistance = 30;
+
+controls.minPolarAngle = Math.PI / 6;
+controls.maxPolarAngle = Math.PI / 2.1;
+
 controls.minAzimuthAngle = 0;
 controls.maxAzimuthAngle = Math.PI / 2;
 
-controls.enableDamping = true;
-controls.dampingFactor = 0.05;
 controls.update();
+
+if (window.innerWidth < 768) {
+  camera.position.set(
+    29.567116827654726,
+    14.018476147584705,
+    31.37040363900147
+  );
+  controls.target.set(
+    -0.08206262548844094,
+    3.3119233527087255,
+    -0.7433922282864018
+  );
+} else {
+  camera.position.set(8.537801878898776, 2.3438515795786268, 5.577204976955839);
+
+  controls.target.set(
+    0.4624746759408973,
+    1.9719940043010387,
+    -0.8300979125494505
+  );
+}
+
 controls.target.set(0.8328469908987052, 0.5876291823158111, -0.954856734408532);
 
 const geometry = new THREE.BoxGeometry(1, 1, 1);
@@ -211,6 +289,9 @@ const cube = new THREE.Mesh(geometry, material);
 const fontLoader = new FontLoader();
 const zs = [];
 const catHeadWorldPos = new THREE.Vector3();
+
+let mainPlank, plank1, plank2, plank3, plant1, plant2, plant3, cup, phone;
+let books = [];
 
 loader.load("/models/PortfolioModelV2.glb", (glb) => {
   glb.scene.traverse((child) => {
@@ -242,6 +323,43 @@ loader.load("/models/PortfolioModelV2.glb", (glb) => {
               child.userData.initialPosition = new THREE.Vector3().copy(
                 child.position
               );
+            }
+            if (child.name.includes("HandingSigns")) {
+              mainPlank = child;
+              child.scale.set(0, 0, 0);
+            } else if (
+              child.name.includes("MyWork_BakedOne_Raycastable_Pointer")
+            ) {
+              plank1 = child;
+              child.scale.set(0, 0, 0);
+            } else if (
+              child.name.includes("About_BakedOne_Raycastable_Pointer")
+            ) {
+              plank2 = child;
+              child.scale.set(0, 0, 0);
+            } else if (
+              child.name.includes("Contact_BakedOne_Raycastable_Pointer")
+            ) {
+              plank3 = child;
+              child.scale.set(0, 0, 0);
+            } else if (child.name.includes("pot_BakedSix")) {
+              plant1 = child;
+              child.scale.set(0, 0, 0);
+            } else if (child.name.includes("pot001_BakedSix_Raycastable")) {
+              plant2 = child;
+              console.log("A");
+              child.scale.set(0, 0, 0);
+            } else if (child.name.includes("PlantJar_BakedSix_Raycastable")) {
+              plant3 = child;
+              child.scale.set(0, 0, 0);
+            } else if (child.name.includes("cup001_BakedFive_Raycastable")) {
+              cup = child;
+              child.scale.set(0, 0, 0);
+            } else if (
+              child.name.includes("phone_BakedFive_Raycastable_Pointer")
+            ) {
+              phone = child;
+              child.scale.set(0, 0, 0);
             }
             if (child.material.map) {
               child.material.map.minFilter = THREE.LinearFilter;
@@ -293,11 +411,41 @@ loader.load("/models/PortfolioModelV2.glb", (glb) => {
         scene.add(zMesh);
         zs.push({ mesh: zMesh, delay: i * 1.0 });
       }
+      loadingManager.itemEnd("font");
     });
+    loadingManager.itemStart("font");
   }
 
   scene.add(glb.scene);
 });
+
+function playIntroAnimation() {
+  const t1 = gsap.timeline({
+    duration: 0.8,
+    ease: "back.out(0.8)",
+  });
+
+  t1.to(mainPlank.scale, { x: 1, y: 1, z: 1 }, 0)
+    .to(plank1.scale, { x: 1, y: 1, z: 1 }, 0)
+    .to(plank2.scale, { x: 1, y: 1, z: 1 }, 0)
+    .to(plank3.scale, { x: 1, y: 1, z: 1 }, 0);
+
+  const t2 = gsap.timeline({
+    duration: 0.8,
+    ease: "back.out(0.8)",
+  });
+
+  t2.to(plant1.scale, { x: 1, y: 1, z: 1 })
+    .to(plant2.scale, { x: 1, y: 1, z: 1 }, "-=0.5")
+    .to(plant3.scale, { x: 1, y: 1, z: 1 }, "-=0.6")
+    .to(cup.scale, { x: 1, y: 1, z: 1 }, "-=0.6")
+    .to(phone.scale, { x: 1, y: 1, z: 1 }, "-=0.6");
+  // .to(plank1, {
+  //   z: 1,
+  //   y: 1,
+  //   x: 1,
+  // });
+}
 
 // Event listeners
 window.addEventListener("resize", () => {
@@ -307,7 +455,6 @@ window.addEventListener("resize", () => {
   // update camera
   camera.aspect = sizes.width / sizes.height;
   camera.updateProjectionMatrix();
-
   // update renderer
   renderer.setSize(sizes.width, sizes.height);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -377,7 +524,8 @@ const render = () => {
       const currentIntersectObject = currentIntersects[0].object;
       if (
         currentIntersectObject.name.includes("Raycastable") &&
-        !currentIntersectObject.name.includes("Text")
+        !currentIntersectObject.name.includes("Text") &&
+        !currentIntersectObject.name.includes("PlantLeafs")
       ) {
         if (currentIntersectObject !== currentHoverObject) {
           if (currentHoverObject) {
@@ -454,5 +602,24 @@ const render = () => {
   renderer.render(scene, camera);
   window.requestAnimationFrame(render);
 };
+const enterBtn = document.getElementById("enter-button");
+enterBtn.addEventListener("click", () => {
+  const loadingScreen = document.getElementById("loading-screen");
+  const text = document.querySelector(".loading-text");
+
+  text.textContent = "Welcome";
+
+  gsap.to(loadingScreen, {
+    duration: 1.2,
+    rotationX: 90,
+    y: "-120%",
+    ease: "power4.in",
+    transformOrigin: "center",
+    onComplete: () => {
+      loadingScreen.style.display = "none";
+      playIntroAnimation();
+    },
+  });
+});
 
 render();

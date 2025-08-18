@@ -1,0 +1,23 @@
+// defaults.scss
+@use "./variables.scss" as vars;
+
+$breakpoints: (
+  "tablet": 768px,
+  "desktop": 1024px,
+);
+
+@mixin media($query) {
+  @if str-index($query, "<=") {
+    $key: str-slice($query, 3); // removes "<="
+    @media (max-width: map-get($breakpoints, $key)) {
+      @content;
+    }
+  } @else if str-index($query, ">=") {
+    $key: str-slice($query, 3); // removes ">="
+    @media (min-width: map-get($breakpoints, $key)) {
+      @content;
+    }
+  } @else {
+    @warn "Invalid media query: #{$query}";
+  }
+}
