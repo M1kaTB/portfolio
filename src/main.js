@@ -691,7 +691,7 @@ enterBtn.addEventListener("touchend", () => {
     console.warn("Autoplay prevented. User interaction needed.", err);
   });
   isMusicPlaying = true;
-  musicToggleBtn.textContent = "🔊";
+  musicIcon.src = musicOn;
 });
 
 render();
