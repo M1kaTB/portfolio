@@ -63,6 +63,8 @@ const showModal = (modal) => {
   modal.style.display = "flex";
   bgOverlay.style.display = "block";
   isModalOpen = true;
+  const content = modal.querySelector(".modal-content");
+  if (content) content.scrollTop = 0;
   controls.enabled = false;
 
   if (currentHoverObject) {

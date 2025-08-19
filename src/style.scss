@@ -169,9 +169,22 @@ body {
       .work-image {
         width: 100%;
         height: 300px;
-        object-fit: cover;
+        object-fit: contain;
         border-radius: 20px;
         border: 8px solid vars.$panel-border;
+      }
+
+      .work-more {
+        font-size: 20px;
+        line-height: 24px;
+        margin-bottom: 10px;
+        font-family: "Super Bubble", Arial, Helvetica, sans-serif;
+        text-align: center;
+        color: vars.$panel-bg-dark;
+
+        @include media.media("<=tablet") {
+          font-size: 15px;
+        }
       }
 
       .work-header {
@@ -206,6 +219,22 @@ body {
       align-items: center;
       justify-content: center;
       font-size: 20px;
+      .image-wrapper {
+        width: 100%;
+        position: relative;
+
+        .about-image {
+          width: 100%;
+          margin-bottom: 40px;
+        }
+
+        .shadow {
+          width: 100%;
+          position: absolute;
+          left: 0;
+          z-index: -1;
+        }
+      }
 
       .about-header {
         font-size: 20px;
