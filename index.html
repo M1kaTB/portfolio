@@ -4,8 +4,77 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/logo-main.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="preload" href="/icons/Mute.svg" as="image" />
+    <link rel="preload" href="/icons/Unmute.svg" as="image" />
+
     <title>Mika Tabatadze Portfolio</title>
+
+    <meta
+      name="description"
+      content="Hi! I'm Mika Tabatadze, a developer who loves building cool web, mobile, and game projects. Take a look at my portfolio to see what I've been creating—everything from apps and websites to fun games!"
+    />
+
+    <meta
+      name="keywords"
+      content="Mika Tabatadze, Portfolio, Web Developer, Front-end, React, Next.js, NestJS, Unity, JavaScript, Python, Game Development, C#, C sharp"
+    />
+    <meta name="author" content="Mika Tabatadze" />
+
+    <meta property="og:title" content="Mika Tabatadze Portfolio" />
+    <meta
+      property="og:description"
+      content="Hey there! I'm Mika, a developer who loves turning ideas into apps, websites, and games. Check out my projects and see what I've been building!"
+    />
+
+    <meta
+      property="og:image"
+      content="https://www.mikatabatadze.com/image/PortfolioPreview.png"
+    />
+    <meta property="og:url" content="https://mikatabatadze.com" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Mika Tabatadze Portfolio" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Mika Tabatadze Portfolio" />
+    <meta
+      name="twitter:description"
+      content="Hey there! I'm Mika, a developer who loves turning ideas into apps, websites, and games. Check out my projects and see what I've been building!"
+    />
+
+    <meta
+      name="twitter:image"
+      content="https://www.mikatabatadze.com/image/PortfolioPreview.png"
+    />
+    <!-- <meta name="twitter:site" content="@" /> -->
+
+    <meta
+      name="apple-mobile-web-app-title"
+      content="Mika Tabatadze Portfolio"
+    />
+    <link rel="apple-touch-icon" href="/logo-main.png" />
+
+    <meta name="theme-color" content="#d2b06c" />
+
+    <link rel="canonical" href="https://mikatabatadze.com" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": "Mika Tabatadze",
+        "url": "https://mikatabatadze.com",
+        "sameAs": [
+          "https://www.linkedin.com/in/mika-tabatadze-631835303/",
+          "https://github.com/M1kaTB"
+        ],
+        "jobTitle": "Full-stack & Front-end Developer",
+        "image": "https://www.mikatabatadze.com/image/PortfolioPreview.png",
+        "description": "Hey there! I'm Mika, a developer who loves turning ideas into apps, websites, and games. Check out my projects and see what I've been building!"
+      }
+    </script>
   </head>
+
   <body>
     <div id="app"></div>
     <div id="loading-screen">
@@ -179,16 +248,19 @@
           free to reach out!
         </p>
         <div class="contact-icons">
-          <a href="">
+          <a href="mailto:mikatabatadze12@gmail.com">
             <img src="icons/email.svg" alt="email" />
           </a>
-          <a href="">
+          <a href="tel:+995558574540">
             <img src="icons/phone.svg" alt="phone" />
           </a>
-          <a href="">
+          <a
+            href="https://www.linkedin.com/in/mika-tabatadze-631835303/"
+            target="_blank"
+          >
             <img src="icons/linkedin.svg" alt="linkedin" />
           </a>
-          <a href="">
+          <a href="https://github.com/M1kaTB" target="_blank">
             <img src="icons/github.svg" alt="github" />
           </a>
         </div>
@@ -196,6 +268,13 @@
       <button class="modal-exit-button">
         <img src="icons/closeIcon.svg" alt="close icon" />
       </button>
+    </div>
+
+    <div class="phone modal">
+      <div class="screen">
+        <h1>Content Coming Soon!</h1>
+      </div>
+      <button class="phone-exit modal-exit-button"></button>
     </div>
 
     <div id="experience">

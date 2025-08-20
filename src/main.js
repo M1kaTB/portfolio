@@ -23,6 +23,7 @@ const modals = {
   work: document.querySelector(".modal.work"),
   about: document.querySelector(".modal.about"),
   contact: document.querySelector(".modal.contact"),
+  phone: document.querySelector(".phone"),
 };
 const bgOverlay = document.querySelector(".bgOverlay");
 
@@ -74,22 +75,31 @@ const showModal = (modal) => {
   document.body.style.cursor = "default";
   currentIntersects = [];
 
-  // Start scale small and transparent
   playPopSound();
-  gsap.set(modal, { scale: 0, opacity: 0, transformOrigin: "center" });
 
-  // Animate pop-in with overshoot
-  gsap.set(modal, {
-    opacity: 0,
-    scale: 0,
-  });
+  if (modal === modals.phone) {
+    modal.style.position = "fixed";
+    modal.style.top = "50%";
+    modal.style.left = "50%";
+    modal.style.transform = "translateX(-50%, -50%)";
 
-  gsap.to(modal, {
-    opacity: 1,
-    scale: 1,
-    duration: 0.5,
-    ease: "back.out(2)",
-  });
+    gsap.set(modal, { y: "100%", opacity: 0 });
+    gsap.to(modal, {
+      y: "0%",
+      opacity: 1,
+      duration: 0.5,
+      ease: "power3.out",
+    });
+  } else {
+    gsap.set(modal, { scale: 0, opacity: 0, transformOrigin: "center" });
+    gsap.to(modal, {
+      opacity: 1,
+      scale: 1,
+      duration: 0.5,
+      ease: "back.out(2)",
+    });
+  }
+
   // Overlay animation
   gsap.set(bgOverlay, {
     backdropFilter: "blur(0px)",
@@ -102,20 +112,34 @@ const showModal = (modal) => {
     ease: "power2.out",
   });
 };
+
 const hideModal = (modal) => {
   isModalOpen = false;
   controls.enabled = true;
   playPopSound();
-  gsap.to(modal, {
-    opacity: 0,
-    scale: 0,
-    duration: 0.5,
-    ease: "back.in(2)",
-    onComplete: () => {
-      modal.style.display = "none";
-    },
-  });
-  // Overlay fade out
+
+  if (modal === modals.phone) {
+    gsap.to(modal, {
+      y: "100%",
+      opacity: 0,
+      duration: 0.5,
+      ease: "power3.in",
+      onComplete: () => {
+        modal.style.display = "none";
+      },
+    });
+  } else {
+    gsap.to(modal, {
+      opacity: 0,
+      scale: 0,
+      duration: 0.5,
+      ease: "back.in(2)",
+      onComplete: () => {
+        modal.style.display = "none";
+      },
+    });
+  }
+
   gsap.to(bgOverlay, {
     backdropFilter: "blur(0px)",
     backgroundColor: "rgba(0,0,0,0)",
@@ -231,6 +255,8 @@ function handleRaycastInteraction() {
       showModal(modals.contact);
     } else if (object.name.includes("About")) {
       showModal(modals.about);
+    } else if (object.name.includes("phone_BakedFive_Raycastable_Pointer")) {
+      showModal(modals.phone);
     }
   }
 }
@@ -624,25 +650,25 @@ const musicOn = "/icons/Unmute.svg";
 let isMusicPlaying = false;
 
 musicToggleBtn.addEventListener("click", () => {
-  if (isMusicPlaying) {
-    bgMusic.pause();
-    musicIcon.src = musicMuted;
-  } else {
-    bgMusic.play();
-    musicIcon.src = musicOn;
-  }
   isMusicPlaying = !isMusicPlaying;
+  musicIcon.src = isMusicPlaying ? musicOn : musicMuted;
+
+  if (isMusicPlaying) {
+    bgMusic.play();
+  } else {
+    bgMusic.pause();
+  }
 });
 
 musicToggleBtn.addEventListener("touchend", () => {
-  if (isMusicPlaying) {
-    bgMusic.pause();
-    musicIcon.src = musicMuted;
-  } else {
-    bgMusic.play();
-    musicIcon.src = musicOn;
-  }
   isMusicPlaying = !isMusicPlaying;
+  musicIcon.src = isMusicPlaying ? musicOn : musicMuted;
+
+  if (isMusicPlaying) {
+    bgMusic.play();
+  } else {
+    bgMusic.pause();
+  }
 });
 
 const enterBtn = document.getElementById("enter-button");
