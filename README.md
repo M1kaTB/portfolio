@@ -2,7 +2,7 @@
 
 Welcome to my portfolio! This is a showcase of my projects and technical work, built with a mix of web development, game development, and creative programming. The site features interactive 3D elements, a custom UI, and playful animations, giving visitors a unique way to explore my work.
 
-![Portfolio Preview](https://www.mikatabatadze.com/image/PortfolioPreview.png)
+![Portfolio Preview](https://www.mikatabatadze.com/images/PortfolioPreview.png)
 
 ## Features
 
@@ -20,7 +20,7 @@ Welcome to my portfolio! This is a showcase of my projects and technical work, b
 
 ## Live Demo
 
-You can view the live portfolio here: [Your Portfolio URL](https://mikatabatadze.com/)
+You can view the live portfolio here: [https://mikatabatadze.com/](https://mikatabatadze.com/)
 
 ## Attribution
 
