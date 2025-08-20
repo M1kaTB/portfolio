@@ -639,7 +639,7 @@ const render = () => {
   window.requestAnimationFrame(render);
 };
 
-const bgMusic = new Audio("/music/music.mp3");
+const bgMusic = new Audio("/music/music2.mp3");
 bgMusic.loop = true;
 bgMusic.volume = 0.5;
 
