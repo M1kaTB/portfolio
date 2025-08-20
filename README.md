@@ -2,7 +2,7 @@
 
 Welcome to my portfolio! This is a showcase of my projects and technical work, built with a mix of web development, game development, and creative programming. The site features interactive 3D elements, a custom UI, and playful animations, giving visitors a unique way to explore my work.
 
-![Portfolio Preview](/images/PortfolioPreview.png)
+![Portfolio Preview](https://github.com/M1kaTB/portfolio/blob/4bc7298e7f7f4a2dc032aa27db7f9022cb528698/public/images/PortfolioPreview.png?raw=true)
 
 ## Features
 
