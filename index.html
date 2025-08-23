@@ -73,7 +73,6 @@
         "description": "Hey there! I'm Mika, a developer who loves turning ideas into apps, websites, and games. Check out my projects and see what I've been building!"
       }
     </script>
-    <script defer src="/_vercel/insights/script.js"></script>
   </head>
 
   <body>
@@ -282,5 +281,10 @@
       <canvas class="experience-canvas" id="experience-canvas"></canvas>
     </div>
     <script type="module" src="/src/main.js"></script>
+
+    <script type="module">
+      import { inject } from "@vercel/analytics";
+      inject();
+    </script>
   </body>
 </html>
